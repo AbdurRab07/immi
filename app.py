@@ -205,7 +205,8 @@ st.markdown("---")
 if "chat_history" not in st.session_state:
     st.session_state.chat_history = []
 
-for role, text in st.session_state.chat_history:
+for msg in st.session_state.chat_history:
+    role, text = msg
     with st.chat_message(role):
         st.markdown(text)
 
