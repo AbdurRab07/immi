@@ -31,14 +31,14 @@ except Exception as e:
 
 # **🔹 Define Memory (Using ConversationSummaryMemory for Context)**
 memory = ConversationSummaryMemory(
-    llm=ChatOpenAI(model="gpt-4-turbo", openai_api_key=OPENAI_API_KEY, temperature=0),
+    llm=ChatOpenAI(model="gpt-4o", openai_api_key=OPENAI_API_KEY, temperature=0),
     memory_key="chat_history",
     return_messages=True
 )
 
 # **🔹 Define LLM with Temperature Setting**
 llm = ChatOpenAI(
-    model="gpt-4-turbo",
+    model="gpt-4o",
     openai_api_key=OPENAI_API_KEY,
     temperature=0.3  # 🔥 Re-added the temperature parameter (tweak as needed)
 )
