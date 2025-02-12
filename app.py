@@ -84,30 +84,51 @@ for role, text in st.session_state.chat_history:
 # **🔹 User Input Handling**
 user_query = st.chat_input("Type your message here...")
 
-if user_query:
-    user_query = user_query.lower().strip()
+# if user_query:
+#     user_query = user_query.lower().strip()
 
+#     with st.chat_message("user"):
+#         st.markdown(user_query)
+
+#     # **🔹 Handle Simple Greetings & Thanks**
+#     greetings = ["hi", "hello", "hey", "good morning", "good evening"]
+#     thanks_messages = ["thanks", "thank you", "appreciate it"]
+
+#     if user_query in greetings:
+#         answer = "Hello! How can I help you today?"
+#     elif user_query in thanks_messages:
+#         answer = "You're welcome! Let me know if you have any more questions."
+#     else:
+#         # **🔹 Process Query Using RAG**
+#         with st.spinner("Thinking..."):
+#             try:
+#                 response = qa_chain.invoke({"question": user_query})
+#                 answer = response.get("answer", "I am continuously learning. Maybe I can respond to this question later.")
+#             except Exception as e:
+#                 answer = f"⚠️ An error occurred: {e}"
+
+#     # **🔹 Display Answer**
+#     with st.chat_message("assistant"):
+#         st.markdown(answer)
+
+#     # **🔹 Store Chat History**
+#     st.session_state.chat_history.append(("user", user_query))
+#     st.session_state.chat_history.append(("assistant", answer))
+
+# **🔹 User Input Processing**
+if user_query:
     with st.chat_message("user"):
         st.markdown(user_query)
 
-    # **🔹 Handle Simple Greetings & Thanks**
-    greetings = ["hi", "hello", "hey", "good morning", "good evening"]
-    thanks_messages = ["thanks", "thank you", "appreciate it"]
+    # **🔹 Process Query Using RAG (Including Greetings & Thanks via Prompt)**
+    with st.spinner("Thinking..."):
+        try:
+            response = qa_chain.invoke({"question": user_query})
+            answer = response.get("answer", "I am continuously learning. Maybe I can respond to this question later.")
+        except Exception as e:
+            answer = f"⚠️ An error occurred: {e}"
 
-    if user_query in greetings:
-        answer = "Hello! How can I help you today?"
-    elif user_query in thanks_messages:
-        answer = "You're welcome! Let me know if you have any more questions."
-    else:
-        # **🔹 Process Query Using RAG**
-        with st.spinner("Thinking..."):
-            try:
-                response = qa_chain.invoke({"question": user_query})
-                answer = response.get("answer", "I am continuously learning. Maybe I can respond to this question later.")
-            except Exception as e:
-                answer = f"⚠️ An error occurred: {e}"
-
-    # **🔹 Display Answer**
+    # **🔹 Display Response**
     with st.chat_message("assistant"):
         st.markdown(answer)
 
