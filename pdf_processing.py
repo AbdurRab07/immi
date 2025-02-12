@@ -38,7 +38,7 @@ def extract_text_with_openai(text):
 
     client = openai.OpenAI(api_key=OPENAI_API_KEY)
     response = client.chat.completions.create(
-        model="gpt-4-turbo",
+        model="gpt-4o",
         messages=[
             {"role": "system", "content": "Extract and format the text from this document, ensuring clarity and completeness."},
             {"role": "user", "content": text}
@@ -99,7 +99,7 @@ def extract_text_from_images(pdf_path):
             # Send to OpenAI Vision API
             client = openai.OpenAI(api_key=OPENAI_API_KEY)
             response = client.chat.completions.create(
-                model="gpt-4-turbo",
+                model="gpt-4o",
                 messages=[
                     {"role": "system", "content": "Extract all readable text from the image."},
                     {"role": "user", "content": [
