@@ -1,3 +1,4 @@
+import os
 import streamlit as st
 from langchain_openai import OpenAIEmbeddings, ChatOpenAI
 from langchain_community.vectorstores import FAISS
@@ -8,9 +9,10 @@ from langchain_core.prompts import ChatPromptTemplate, MessagesPlaceholder
 from langchain_core.runnables.history import RunnableWithMessageHistory
 from langchain_core.chat_history import BaseChatMessageHistory
 from langchain_community.chat_message_histories import ChatMessageHistory
+from dotenv import load_dotenv
 from difflib import get_close_matches
 
-# Load API Key from Streamlit Secrets
+# Load OpenAI API Key from Streamlit Secrets
 try:
     OPENAI_API_KEY = st.secrets["OPENAI_API_KEY"]
 except KeyError:
@@ -31,35 +33,48 @@ if "faiss_db" not in st.session_state:
 
 db = st.session_state.faiss_db  # Use cached FAISS instance
 
-# Define LLM
+# Define LLM with Temperature Setting
 llm = ChatOpenAI(
     model="gpt-4o",
     openai_api_key=OPENAI_API_KEY,
     temperature=0.3
 )
 
-# Contextualization Prompt
-contextualize_q_prompt = ChatPromptTemplate.from_messages([
-    ("system", "Given a chat history and the latest user question, rewrite it as a standalone question."),
-    MessagesPlaceholder("chat_history"),
-    ("human", "{input}"),
-])
+# Contextualize Question
+contextualize_q_system_prompt = """
+Given a chat history and the latest user question, which might reference context in the chat history, 
+formulate a standalone question that can be understood without the chat history. 
+Do NOT answer the question, just reformulate it if needed and otherwise return it as is.
+"""
+contextualize_q_prompt = ChatPromptTemplate.from_messages(
+    [
+        ("system", contextualize_q_system_prompt),
+        MessagesPlaceholder("chat_history"),
+        ("human", "{input}"),
+    ]
+)
 
 history_aware_retriever = create_history_aware_retriever(
     llm, db.as_retriever(search_kwargs={"k": 10}), contextualize_q_prompt
 )
 
 # QA Prompt
-qa_prompt = ChatPromptTemplate.from_messages([
-    ("system", """
-    You are an expert in Irish immigration laws. Answer questions **ONLY** using the provided data.
-    If the answer is **not found**, respond with:
-    **'I am continuously learning. Maybe I can respond to this question later.'**
-    """),
-    MessagesPlaceholder("chat_history"),
-    ("human", "{input}"),
-    ("system", "{context}"),
-])
+qa_system_prompt = """
+You are an expert in Irish immigration laws. Answer questions **ONLY** using the provided data.
+If the answer is **not found** in the data:
+- **If the question contains a minor spelling mistake**, correct it and provide the correct answer.
+- **If the term does not exist in Irish immigration law**, clearly say:  
+  **"There is no such term in Irish immigration law. Please recheck your query or clarify."**
+"""
+
+qa_prompt = ChatPromptTemplate.from_messages(
+    [
+        ("system", qa_system_prompt),
+        MessagesPlaceholder("chat_history"),
+        ("human", "{input}"),
+        ("system", "{context}"),
+    ]
+)
 
 # Create Chains
 question_answer_chain = create_stuff_documents_chain(llm, qa_prompt)
