@@ -9,7 +9,15 @@ from langchain_core.prompts import ChatPromptTemplate, MessagesPlaceholder
 from langchain_core.runnables.history import RunnableWithMessageHistory
 from langchain_core.chat_history import BaseChatMessageHistory
 from langchain_community.chat_message_histories import ChatMessageHistory
-from dotenv import load_dotenv
+import openai
+
+# **🔹 Load OpenAI API Key from Streamlit Secrets**
+try:
+    OPENAI_API_KEY = st.secrets["OPENAI_API_KEY"]
+except KeyError:
+    st.error("❌ ERROR: OpenAI API key not found. Please check your Streamlit Secrets configuration.")
+    st.stop()
+
 from difflib import get_close_matches
 
 # Load OpenAI API Key from Streamlit Secrets
